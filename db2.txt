@@ -1,0 +1,42 @@
+create table doctor(dssn varchar(10) primary key,dname varchar(15),speciality varchar(15),Experience int(3));
+
+create table patient(pssn varchar(10) primary key, pname varchar(10),paddress varchar(20),age int(3));
+
+create table pharma_co(pcname varchar(15) primary key,pcaddr varchar(10),pcphone bigint(10));
+
+create table drug(tradename varchar(20) primary key,formula varchar(12),pcname varchar(15),foreign key(pcname) references pharma_co(pcname));
+
+create table pharmacy(phname varchar(15) primary key,phaddr varchar(13),phphone bigint(10));
+
+create table sell(phname varchar(15),tradename varchar(20),price int(4),foreign key(phname) references pharmacy(phname),foreign key(tradename) references drug(tradename),primary key(phname,tradename));
+
+create table checks(dssn varchar(10),pssn varchar(10),foreign key(dssn) references doctor(dssn),foreign key(pssn) references patient(pssn),primary key(dssn,pssn));
+
+create table prescribe(dssn varchar(10),pssn varchar(10),tradename varchar(20), date date,quantity int(3), foreign key(dssn) references doctor(dssn), foreign key(pssn) references patient(pssn), foreign key(tradename) references drug(tradename), primary key(dssn,pssn,tradename));
+
+create table contract(pcname varchar(15),phname varchar(15),sdate date,ldate date,supervisor varchar(15),text varchar(15),foreign key(pcname) references pharma_co(pcname), foreign key(phname) references pharmacy(phname),primary key(pcname,phname));
+
+
+
+
+
+2.1
+select p.* from patient p,doctor d, checks c where p.pssn=c.pssn and d.dssn=c.dssn and  p.age>=20 and d.speciality="opthomologist";
+
+2.2
+select d.*,count(p.dssn) from doctor d,prescribe p where d.dssn=p.dssn and  year(p.date)="2013" group by p.dssn having count(p.dssn)>=4;
+
+2.3
+select * from doctor where experience in(select max(experience) from doctor);  
+
+2.4
+select p.pcname from pharma_co p, pharmacy ph, contract c where p.pcname=c.pcname and ph.phname=c.phname and p.pcaddr=ph.phaddr group by p.pcname having count(c.supervisor)>=2;
+
+
+2.5
+select pcname, count(pcname) from drug d group by pcname having count(pcname)=1;
+
+
+2.6
+select distinct d.* from drug d,pharmacy p, sell s where p.phname=s.phname and s.tradename=d.tradename;
+
